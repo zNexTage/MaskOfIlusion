@@ -74,13 +74,21 @@ public class Player : MonoBehaviour
         //Se pressionar o botao de pulo (Espaço)
         if (Input.GetButtonDown("Jump") && IsGrounded)
         {
+            //Reproduz o som do pulo
+            GameController.PlaySFX(GameController.SfxJump, 0.5f); 
+
             //Realiza o pulo do personagem
             PlayerRb.AddForce(new Vector2(0, JumpForce));
         }
         if (Input.GetButtonDown("Fire1") && !this.IsAttack) 
         {
+            //Reproduz o som do ataque
+            GameController.PlaySFX(GameController.SfxAttack, 0.5f);
+
+            //Simboliza que o personagem esta atacando
             this.IsAttack = true;
 
+            //Realiza o trigger para poder acontecer a animação do ataque
             PlayerAnimator.SetTrigger(ParametersAnimator.ATTACK);
         }
 
@@ -145,5 +153,14 @@ public class Player : MonoBehaviour
 
         //Destroi a caixa de colisão
         Destroy(HitBoxTemp, 0.2f);
+    }
+
+    /// <summary>
+    /// Realiza a reprodução dos sons dos passos
+    /// </summary>
+    public void FootStep() 
+    {
+        //Reproduz os sons dos passos
+        GameController.PlaySFX(GameController.SfxStep[Random.Range(0, 1)], 0.5f);
     }
 }

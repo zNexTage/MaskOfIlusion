@@ -11,6 +11,17 @@ public class GameController : MonoBehaviour
 
     public float SpeedCam;
 
+    #region Sounds Variables
+    [Header("Audio")]
+    public AudioSource SfxSource;
+    public AudioSource MusicSource;
+
+    public AudioClip SfxJump;
+    public AudioClip SfxAttack;
+    public AudioClip[] SfxStep;
+
+    #endregion
+
     // Start is called before the first frame update
     void Start()
     {
@@ -68,4 +79,15 @@ public class GameController : MonoBehaviour
         //Faz a camera seguir o personagem
         cam.transform.position = Vector3.Lerp(cam.transform.position, posCam, SpeedCam * Time.deltaTime);
     }
+
+    #region Sound Play
+    /// <summary>
+    /// Reproduz os sons de passos, pulo, ataque e etc...
+    /// </summary>
+    public void PlaySFX(AudioClip SfxClip, float Volume) 
+    {
+        //Dispara o som uma vez
+        SfxSource.PlayOneShot(SfxClip, Volume);
+    }
+    #endregion
 }
