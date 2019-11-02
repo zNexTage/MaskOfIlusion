@@ -68,6 +68,7 @@
     <Compile Include="Assets\Scripts\Parallax.cs" />
     <Compile Include="Assets\Scripts\Player.cs" />
     <Compile Include="Assets\Scripts\Util\ParametersAnimator.cs" />
+    <Compile Include="Assets\Scripts\Util\TagParameters.cs" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>D:/Projetos/Unity/MaskOfIlusion/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>

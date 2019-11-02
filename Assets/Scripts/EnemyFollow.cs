@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Assets.Scripts.Util;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,43 +9,60 @@ public class EnemyFollow : MonoBehaviour
     private Transform Target;
     public Animator Enemy;
     public bool IsLookLeft;
-    public Player player;    
+    bool Attack;
+    public float PositionY;
 
     // Start is called before the first frame update
     void Start()
     {
+        //Procura o objeto Player que sera o target (alvo)
         Target = GameObject.FindGameObjectWithTag("Player").GetComponent<Transform>();
 
+        //Adquiri o componente Animator do objeto
         Enemy = GetComponent<Animator>();
-
-        player = FindObjectOfType(typeof(Player)) as Player;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (player.transform.position.x < this.transform.position.x && this.IsLookLeft)
+        //Troca o lado para qual o personagem inimigo esta olhando
+        if (Target.transform.position.x < this.transform.position.x && this.IsLookLeft)
         {
             Flip();
         }
-        else if (player.transform.position.x > this.transform.position.x && !this.IsLookLeft)
+        else if (Target.transform.position.x > this.transform.position.x && !this.IsLookLeft)
         {
             Flip();
         }
 
-        if (Vector2.Distance(transform.position, Target.position) > 2)
+        //Verifica a distancia entre o inimigo e o jogador e se o inimigo ja esta atacando
+        if (Vector2.Distance(transform.position, Target.position) > 2 && !Attack)
         {
-            transform.position = new Vector3(transform.position.x, -0.31f, transform.position.z);
+            //Verifica pela tag qual é o inimigo para determinar sua posição eixo Y
+            VerifyTag();
 
+            //Recebe as posições para qual o personagem inimigo irá se mover
+            transform.position = new Vector3(transform.position.x, PositionY, transform.position.z);
+
+            //Realiza a movimentação
             transform.position = Vector2.MoveTowards(transform.position, Target.position, Speed * Time.deltaTime);
 
+            //Seta a variavel IsWalk como true para o personagem realiza a animação 
             Enemy.SetBool("IsWalk", true);
         }
-        else 
+        else
         {
+            //Se o personagem inimigo estiver numa distancia menor do que a condição, ele para de andar
             Enemy.SetBool("IsWalk", false);
-        }        
+
+            //Realiza o ataque.
+            InitAttack();
+        }
+
+        //Seta a animação de ataque;
+        Enemy.SetBool("IsAttack", Attack);
     }
+
 
     /// <summary>
     /// Muda o lado que o personagem esta olhando
@@ -63,5 +81,52 @@ public class EnemyFollow : MonoBehaviour
 
         //Realiza a inversao 
         transform.localScale = new Vector3(PositionX, transform.localScale.y, transform.localScale.z);
+    }
+
+    /// <summary>
+    /// Seta a variavel de ataque como true
+    /// </summary>
+    public void InitAttack()
+    {
+        Attack = true;
+    }
+
+    /// <summary>
+    /// Seta a variavel de finalizar o ataque como false
+    /// </summary>
+    public void EndAttack()
+    {
+        Attack = false;
+    }
+
+    /// <summary>
+    /// Verifica pela tag qual é o personagem inimigo para determinar a sua posição no eixo Y
+    /// </summary>
+    public void VerifyTag()
+    {
+        switch (this.tag)
+        {
+            //Se for o inimigo Loren Knight
+            case TagParameters.LOREN_KNIGHT:
+                {
+                    //Define sua posição no eixo Y
+                    PositionY = -0.31f;
+                    break;
+                }
+            //Se for o inimigo Minotauro
+            case TagParameters.BOSS_MINOTAURO:
+                {
+                    //Define sua posição no eixo Y
+                    PositionY = -0.88f;
+                    break;
+                }
+            //Se for o inimigo Blue Knight
+            case TagParameters.BOSS_BLUE_KNIGHT: 
+                {
+                    //Define sua posição no eixo Y
+                    PositionY = -0.78f;
+                    break;
+                }
+        }
     }
 }
