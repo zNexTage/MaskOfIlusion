@@ -12,6 +12,7 @@ public class Player : MonoBehaviour
 
     public float Speed;
     public float JumpForce;
+    public float MovHorizontal;
 
     //Utilizamos para verificar se o personagem esta olhando para a esquerda
     //para mudar a sua animação
@@ -47,7 +48,6 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float MovHorizontal;
         float SpeedY;
 
         //Receve a movimentação na horizontal
@@ -59,11 +59,11 @@ public class Player : MonoBehaviour
         }
 
         //MovHorizontal > 0 -> Personagem esta andando para a direita e olhando para a direita
-        if (MovHorizontal > 0 && this.IsLookLeft)
+        if (this.MovHorizontal > 0 && this.IsLookLeft)
         {
             Flip();
         }
-        else if (MovHorizontal < 0 && !this.IsLookLeft)
+        else if (this.MovHorizontal < 0 && !this.IsLookLeft)
         {
             Flip();
         }
@@ -93,7 +93,7 @@ public class Player : MonoBehaviour
         }
 
         //Realiza a movimentação do personagem
-        PlayerRb.velocity = new Vector2(MovHorizontal * Speed, SpeedY);
+        PlayerRb.velocity = new Vector2(this.MovHorizontal * Speed, SpeedY);
 
         /*************ATUALIZANDO O ANIMATOR****************/
         //Altera o valor das variaveis criadas no animation, para realizar a troca de animação
