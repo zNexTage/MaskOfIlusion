@@ -11,5 +11,6 @@ namespace Assets.Scripts.Util
         public const string LOREN_KNIGHT = "LorenKnight";
         public const string BOSS_MINOTAURO = "Boss_Minotauro";
         public const string BOSS_BLUE_KNIGHT = "Boss_BlueKnight";
+        public const string BOSS_FINAL_BOSS = "Boss_FinalBoss";
     }
 }

@@ -121,10 +121,15 @@ public class EnemyFollow : MonoBehaviour
                     break;
                 }
             //Se for o inimigo Blue Knight
-            case TagParameters.BOSS_BLUE_KNIGHT: 
+            case TagParameters.BOSS_BLUE_KNIGHT:
                 {
                     //Define sua posição no eixo Y
                     PositionY = -0.78f;
+                    break;
+                }
+            case TagParameters.BOSS_FINAL_BOSS:
+                {
+                    PositionY = -0.87f;
                     break;
                 }
         }

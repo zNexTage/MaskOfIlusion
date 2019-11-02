@@ -8,6 +8,7 @@ TagManager:
   - Boss_Minotauro
   - LorenKnight
   - Boss_BlueKnight
+  - Boss_FinalBoss
   layers:
   - Default
   - TransparentFX
