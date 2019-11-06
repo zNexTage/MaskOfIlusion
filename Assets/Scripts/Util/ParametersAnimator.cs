@@ -13,5 +13,6 @@ namespace Assets.Scripts.Util
         public const string SPEED_Y = "SpeedY";
         public const string ATTACK = "Attack";
         public const string IS_ATTACK = "IsAttack";
+        public const string IS_DEAD = "IsDead";
     }
 }

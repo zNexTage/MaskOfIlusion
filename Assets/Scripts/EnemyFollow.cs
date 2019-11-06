@@ -11,6 +11,13 @@ public class EnemyFollow : MonoBehaviour
     public bool IsLookLeft;
     bool Attack;
     public float PositionY;
+    public GameObject HitBoxPrefab;
+    public Transform Mao;
+    GameObject HitBoxTemp;
+    public float Life;
+    public Player Jogador;
+    public bool IsDead;
+    public static GameObject EnemyObj;
 
     // Start is called before the first frame update
     void Start()
@@ -25,42 +32,51 @@ public class EnemyFollow : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //Troca o lado para qual o personagem inimigo esta olhando
-        if (Target.transform.position.x < this.transform.position.x && this.IsLookLeft)
+        //Se a vida do personagem for maior que 0
+        if (Life > 0 && !IsDead)
         {
-            Flip();
+            //Troca o lado para qual o personagem inimigo esta olhando
+            if (Target.transform.position.x < this.transform.position.x && this.IsLookLeft)
+            {
+                Flip();
+            }
+            else if (Target.transform.position.x > this.transform.position.x && !this.IsLookLeft)
+            {
+                Flip();
+            }
+
+            //Verifica a distancia entre o inimigo e o jogador e se o inimigo ja esta atacando
+            if (Vector2.Distance(transform.position, Target.position) > 2 && !Attack)
+            {
+                //Verifica pela tag qual é o inimigo para determinar sua posição eixo Y
+                VerifyTag();
+
+                //Recebe as posições para qual o personagem inimigo irá se mover
+                transform.position = new Vector3(transform.position.x, PositionY, transform.position.z);
+
+                //Realiza a movimentação
+                transform.position = Vector2.MoveTowards(transform.position, Target.position, Speed * Time.deltaTime);
+
+                //Seta a variavel IsWalk como true para o personagem realiza a animação 
+                Enemy.SetBool("IsWalk", true);
+
+            }
+            else
+            {
+                //Se o personagem inimigo estiver numa distancia menor do que a condição, ele para de andar
+                Enemy.SetBool("IsWalk", false);
+
+                //Realiza o ataque.
+                InitAttack();
+            }
         }
-        else if (Target.transform.position.x > this.transform.position.x && !this.IsLookLeft)
-        {
-            Flip();
-        }
 
-        //Verifica a distancia entre o inimigo e o jogador e se o inimigo ja esta atacando
-        if (Vector2.Distance(transform.position, Target.position) > 2 && !Attack)
-        {
-            //Verifica pela tag qual é o inimigo para determinar sua posição eixo Y
-            VerifyTag();
 
-            //Recebe as posições para qual o personagem inimigo irá se mover
-            transform.position = new Vector3(transform.position.x, PositionY, transform.position.z);
-
-            //Realiza a movimentação
-            transform.position = Vector2.MoveTowards(transform.position, Target.position, Speed * Time.deltaTime);
-
-            //Seta a variavel IsWalk como true para o personagem realiza a animação 
-            Enemy.SetBool("IsWalk", true);
-        }
-        else
-        {
-            //Se o personagem inimigo estiver numa distancia menor do que a condição, ele para de andar
-            Enemy.SetBool("IsWalk", false);
-
-            //Realiza o ataque.
-            InitAttack();
-        }
 
         //Seta a animação de ataque;
         Enemy.SetBool("IsAttack", Attack);
+
+        Enemy.SetBool("IsDead", IsDead);
     }
 
 
@@ -92,11 +108,19 @@ public class EnemyFollow : MonoBehaviour
     }
 
     /// <summary>
-    /// Seta a variavel de finalizar o ataque como false
+    /// Seta a variavel de finalizar o ataque como false e destroi o hitbox do ataque
     /// </summary>
     public void EndAttack()
     {
         Attack = false;
+
+        DestroyHitBoxTemp();
+    }
+
+    public void DestroyHitBoxTemp() 
+    {
+        //Destroi a caixa de colisão
+        Destroy(HitBoxTemp, 0.2f);
     }
 
     /// <summary>
@@ -133,5 +157,42 @@ public class EnemyFollow : MonoBehaviour
                     break;
                 }
         }
+    }
+
+    /// <summary>
+    /// HitBox do ataquel
+    /// </summary>
+    public void HitBoxAttack()
+    {
+        BoxCollider2D boxPlayer;
+
+        //Instancia a caixa de colisão
+        HitBoxTemp = Instantiate(HitBoxPrefab, Mao.position, transform.localRotation);
+
+        boxPlayer = HitBoxTemp.GetComponent<BoxCollider2D>();
+
+        boxPlayer.size = new Vector2(1.118301f, 2.52275f);
+    }
+
+    public void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == TagParameters.HIT_BOX)
+        {
+            Life -= Jogador.Dano;
+
+            if (Life <= 0)
+            {
+                Attack = false;
+                IsDead = true;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Ocorre quando o inimigo personagem morre
+    /// </summary>
+    public void OnDead()
+    {
+        Destroy(this.gameObject);
     }
 }

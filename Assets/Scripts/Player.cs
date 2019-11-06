@@ -27,6 +27,8 @@ public class Player : MonoBehaviour
     public GameObject HitBoxPrefab;
     public Transform Mao;
 
+    public float Dano;
+
     //Controle do jogo: musica, camera e etc...
     private GameController GameController;
 
@@ -147,9 +149,14 @@ public class Player : MonoBehaviour
     public void HitBoxAttack() 
     {
         GameObject HitBoxTemp;
+        BoxCollider2D boxPlayer;
 
         //Instancia a caixa de colisão
         HitBoxTemp = Instantiate(HitBoxPrefab, Mao.position, transform.localRotation);
+
+        boxPlayer = HitBoxTemp.GetComponent<BoxCollider2D>();
+
+        boxPlayer.size = new Vector2(1.118301f, 2.52275f);
 
         //Destroi a caixa de colisão
         Destroy(HitBoxTemp, 0.2f);
