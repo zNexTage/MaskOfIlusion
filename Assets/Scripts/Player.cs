@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
@@ -82,7 +83,7 @@ public class Player : MonoBehaviour
             SpeedY = PlayerRb.velocity.y;
 
             //Se pressionar o botao de pulo (Espaço)
-            if (Input.GetButtonDown("Jump") && IsGrounded)
+            if (Input.GetButtonDown("Jump") && IsGrounded && !IsDead)
             {
                 //Reproduz o som do pulo
                 GameController.PlaySFX(GameController.SfxJump, 0.5f);
@@ -90,7 +91,7 @@ public class Player : MonoBehaviour
                 //Realiza o pulo do personagem
                 PlayerRb.AddForce(new Vector2(0, JumpForce));
             }
-            if (Input.GetButtonDown("Fire1") && !this.IsAttack)
+            if (Input.GetButtonDown("Fire1") && !this.IsAttack && !IsDead)
             {
                 //Reproduz o som do ataque
                 GameController.PlaySFX(GameController.SfxAttack, 0.5f);
@@ -113,10 +114,10 @@ public class Player : MonoBehaviour
 
             PlayerAnimator.SetFloat(ParametersAnimator.SPEED_Y, SpeedY);
 
-            PlayerAnimator.SetBool(ParametersAnimator.IS_ATTACK, IsAttack);
+            PlayerAnimator.SetBool("IsAttackPlayer", IsAttack);
         }
 
-        PlayerAnimator.SetBool(ParametersAnimator.IS_DEAD, IsDead);
+        PlayerAnimator.SetBool("IsDeadPlayer", IsDead);
     }
 
     /// <summary>
@@ -184,13 +185,17 @@ public class Player : MonoBehaviour
 
     public void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.tag == "HitBox")
+        if (collision.gameObject.tag == "HitBoxEnemy")
         {
             Health.health -= Enemy.Damage;
 
             if (Health.health <= 0)
             {
-                IsDead = true;
+                IsGrounded = true;
+
+                this.transform.position = new Vector3(this.transform.position.x, 0f, this.transform.position.z);
+
+                IsDead = true;                
             }
         }
     }
@@ -201,5 +206,9 @@ public class Player : MonoBehaviour
     public void OnDead()
     {
         Destroy(this.gameObject);
+
+        SceneManager.LoadScene("SampleScene");
     }
+
+
 }
