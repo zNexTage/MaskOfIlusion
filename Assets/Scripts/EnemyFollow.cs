@@ -18,6 +18,7 @@ public class EnemyFollow : MonoBehaviour
     public Player Jogador;
     public bool IsDead;
     public static GameObject EnemyObj;
+    public float Damage;
 
     // Start is called before the first frame update
     void Start()
@@ -33,7 +34,7 @@ public class EnemyFollow : MonoBehaviour
     void Update()
     {
         //Se a vida do personagem for maior que 0
-        if (Life > 0 && !IsDead)
+        if (Life > 0 && !IsDead && !Jogador.IsDead)
         {
             //Troca o lado para qual o personagem inimigo esta olhando
             if (Target.transform.position.x < this.transform.position.x && this.IsLookLeft)
@@ -104,7 +105,10 @@ public class EnemyFollow : MonoBehaviour
     /// </summary>
     public void InitAttack()
     {
-        Attack = true;
+        if (!Jogador.IsDead)
+        {
+            Attack = true;
+        }
     }
 
     /// <summary>

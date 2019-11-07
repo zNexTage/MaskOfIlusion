@@ -32,6 +32,10 @@ public class Player : MonoBehaviour
     //Controle do jogo: musica, camera e etc...
     private GameController GameController;
 
+    public EnemyFollow Enemy;
+
+    public bool IsDead;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -40,6 +44,8 @@ public class Player : MonoBehaviour
 
         //Recebe o componente Animator do objeto Player
         PlayerAnimator = GetComponent<Animator>();
+
+        Enemy = FindObjectOfType(typeof(EnemyFollow)) as EnemyFollow;
 
         //Recebe o objeto gamecontroler
         GameController = FindObjectOfType(typeof(GameController)) as GameController;
@@ -50,62 +56,67 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
         float SpeedY;
-
-        //Receve a movimentação na horizontal
-        MovHorizontal = Input.GetAxisRaw("Horizontal");
-
-        if (IsAttack && IsGrounded) 
+        if (!IsDead)
         {
-            MovHorizontal = 0;
+            //Receve a movimentação na horizontal
+            MovHorizontal = Input.GetAxisRaw("Horizontal");
+
+            if (IsAttack && IsGrounded)
+            {
+                MovHorizontal = 0;
+            }
+
+            //MovHorizontal > 0 -> Personagem esta andando para a direita e olhando para a direita
+            if (this.MovHorizontal > 0 && this.IsLookLeft)
+            {
+                Flip();
+            }
+            else if (this.MovHorizontal < 0 && !this.IsLookLeft)
+            {
+                Flip();
+            }
+
+            //Adquiri a velocidade no plano Y
+            SpeedY = PlayerRb.velocity.y;
+
+            //Se pressionar o botao de pulo (Espaço)
+            if (Input.GetButtonDown("Jump") && IsGrounded)
+            {
+                //Reproduz o som do pulo
+                GameController.PlaySFX(GameController.SfxJump, 0.5f);
+
+                //Realiza o pulo do personagem
+                PlayerRb.AddForce(new Vector2(0, JumpForce));
+            }
+            if (Input.GetButtonDown("Fire1") && !this.IsAttack)
+            {
+                //Reproduz o som do ataque
+                GameController.PlaySFX(GameController.SfxAttack, 0.5f);
+
+                //Simboliza que o personagem esta atacando
+                this.IsAttack = true;
+
+                //Realiza o trigger para poder acontecer a animação do ataque
+                PlayerAnimator.SetTrigger(ParametersAnimator.ATTACK);
+            }
+
+            //Realiza a movimentação do personagem
+            PlayerRb.velocity = new Vector2(this.MovHorizontal * Speed, SpeedY);
+
+            /*************ATUALIZANDO O ANIMATOR****************/
+            //Altera o valor das variaveis criadas no animation, para realizar a troca de animação
+            PlayerAnimator.SetInteger(ParametersAnimator.MOV_H, (int)MovHorizontal);
+
+            PlayerAnimator.SetBool(ParametersAnimator.IS_GROUNDED, IsGrounded);
+
+            PlayerAnimator.SetFloat(ParametersAnimator.SPEED_Y, SpeedY);
+
+            PlayerAnimator.SetBool(ParametersAnimator.IS_ATTACK, IsAttack);
         }
 
-        //MovHorizontal > 0 -> Personagem esta andando para a direita e olhando para a direita
-        if (this.MovHorizontal > 0 && this.IsLookLeft)
-        {
-            Flip();
-        }
-        else if (this.MovHorizontal < 0 && !this.IsLookLeft)
-        {
-            Flip();
-        }
-
-        //Adquiri a velocidade no plano Y
-        SpeedY = PlayerRb.velocity.y;
-
-        //Se pressionar o botao de pulo (Espaço)
-        if (Input.GetButtonDown("Jump") && IsGrounded)
-        {
-            //Reproduz o som do pulo
-            GameController.PlaySFX(GameController.SfxJump, 0.5f); 
-
-            //Realiza o pulo do personagem
-            PlayerRb.AddForce(new Vector2(0, JumpForce));
-        }
-        if (Input.GetButtonDown("Fire1") && !this.IsAttack) 
-        {
-            //Reproduz o som do ataque
-            GameController.PlaySFX(GameController.SfxAttack, 0.5f);
-
-            //Simboliza que o personagem esta atacando
-            this.IsAttack = true;
-
-            //Realiza o trigger para poder acontecer a animação do ataque
-            PlayerAnimator.SetTrigger(ParametersAnimator.ATTACK);
-        }
-
-        //Realiza a movimentação do personagem
-        PlayerRb.velocity = new Vector2(this.MovHorizontal * Speed, SpeedY);
-
-        /*************ATUALIZANDO O ANIMATOR****************/
-        //Altera o valor das variaveis criadas no animation, para realizar a troca de animação
-        PlayerAnimator.SetInteger(ParametersAnimator.MOV_H, (int)MovHorizontal);
-
-        PlayerAnimator.SetBool(ParametersAnimator.IS_GROUNDED, IsGrounded);
-
-        PlayerAnimator.SetFloat(ParametersAnimator.SPEED_Y, SpeedY);
-
-        PlayerAnimator.SetBool(ParametersAnimator.IS_ATTACK, IsAttack);
+        PlayerAnimator.SetBool(ParametersAnimator.IS_DEAD, IsDead);
     }
 
     /// <summary>
@@ -137,7 +148,7 @@ public class Player : MonoBehaviour
     /// <summary>
     /// Chamada dentro da animação quando o personagem
     /// </summary>
-    public void OnEndAttack() 
+    public void OnEndAttack()
     {
         //Finaliza o ataque
         IsAttack = false;
@@ -146,7 +157,7 @@ public class Player : MonoBehaviour
     /// <summary>
     /// Cria o colisor do hit box
     /// </summary>
-    public void HitBoxAttack() 
+    public void HitBoxAttack()
     {
         GameObject HitBoxTemp;
         BoxCollider2D boxPlayer;
@@ -165,9 +176,30 @@ public class Player : MonoBehaviour
     /// <summary>
     /// Realiza a reprodução dos sons dos passos
     /// </summary>
-    public void FootStep() 
+    public void FootStep()
     {
         //Reproduz os sons dos passos
         GameController.PlaySFX(GameController.SfxStep[Random.Range(0, 1)], 0.5f);
+    }
+
+    public void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "HitBox")
+        {
+            Health.health -= Enemy.Damage;
+
+            if (Health.health <= 0)
+            {
+                IsDead = true;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Destroi o objeto Player quando ele morre
+    /// </summary>
+    public void OnDead()
+    {
+        Destroy(this.gameObject);
     }
 }
